@@ -1,0 +1,39 @@
+{
+  "test": "TMF 702 Box",
+  "type": "Constant Arrival Rate",
+  "scenario": "ESC-002",
+  "targetTPS": 10,
+  "periodSeconds": 10,
+  "expectedTransactions": 90,
+  "actualTransactions": 62,
+  "transactionCompliance": 68.89,
+  "startTime": "24/08/2026 14:36:40",
+  "targetRate": 10,
+  "duration": "10s",
+  "durationSeconds": 10,
+  "boxesAvailable": 10,
+  "iterations": 61,
+  "httpRequests": 62,
+  "successfulChecks": 61,
+  "failedChecks": 0,
+  "successRate": 100,
+  "errorRate": 0,
+  "throughput": 6.2,
+  "throughputCompliance": 62,
+  "maxVUs": 8,
+  "responseTime": {
+    "min": 136.04,
+    "median": 170.14,
+    "average": 182.6,
+    "p90": 238.15,
+    "p95": 262.74,
+    "p99": 424.97,
+    "max": 536.83
+  },
+  "thresholds": {
+    "p95": "< 5000 ms",
+    "errorRate": "< 5%",
+    "expectedTransactions": ">= 90"
+  },
+  "result": "FALLIDO"
+}

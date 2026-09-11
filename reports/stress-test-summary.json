@@ -1,0 +1,174 @@
+{
+  "metrics": {
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 1
+      }
+    },
+    "http_req_tls_handshaking": {
+      "values": {
+        "p(90)": 202.9499,
+        "p(95)": 202.9499,
+        "p(99)": 202.9499,
+        "max": 202.9499,
+        "min": 202.9499,
+        "med": 202.9499,
+        "avg": 202.9499
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 10540,
+        "rate": 13517.801302685119
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 93.5175,
+        "med": 93.5175,
+        "avg": 93.5175,
+        "p(90)": 93.5175,
+        "p(95)": 93.5175,
+        "p(99)": 93.5175,
+        "max": 93.5175
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "rate": 7041.055896749649,
+        "count": 5490
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1,
+        "rate": 1.282523842759499
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 140.3267,
+        "min": 140.3267,
+        "med": 140.3267,
+        "avg": 140.3267,
+        "p(90)": 140.3267,
+        "p(95)": 140.3267,
+        "p(99)": 140.3267
+      }
+    },
+    "http_req_blocked": {
+      "values": {
+        "p(90)": 297.5254,
+        "p(95)": 297.5254,
+        "p(99)": 297.5254,
+        "max": 297.5254,
+        "min": 297.5254,
+        "med": 297.5254,
+        "avg": 297.5254
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 138.6161,
+        "p(90)": 138.6161,
+        "p(95)": 138.6161,
+        "p(99)": 138.6161,
+        "max": 138.6161,
+        "min": 138.6161,
+        "med": 138.6161
+      }
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 1.7106,
+        "med": 1.7106,
+        "avg": 1.7106,
+        "p(90)": 1.7106,
+        "p(95)": 1.7106,
+        "p(99)": 1.7106,
+        "max": 1.7106
+      }
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 140.3267,
+        "p(90)": 140.3267,
+        "p(95)": 140.3267,
+        "p(99)": 140.3267,
+        "max": 140.3267,
+        "min": 140.3267,
+        "med": 140.3267
+      },
+      "thresholds": {
+        "p(95)<5000": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0,
+        "p(99)": 0,
+        "max": 0,
+        "min": 0,
+        "med": 0,
+        "avg": 0,
+        "p(90)": 0
+      }
+    }
+  },
+  "setup_data": {
+    "token": "eyJraWQiOiJHd1ptOCtES05VcjdqaC9lY2IveG9CL01KSGRLb29mcm1VdnBhVkdZOStRPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJnYjI2dHNyZ3RlaHNodHBnZGwwYzFncHE2IiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJ0bWYvdG1mNjc5LndyaXRlIiwiYXV0aF90aW1lIjoxNzg4NDQ5NDgzLCJpc3MiOiJodHRwczovL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tL3VzLWVhc3QtMV9pZWFFRUI4djUiLCJleHAiOjE3ODg0NTAzODMsImlhdCI6MTc4ODQ0OTQ4MywidmVyc2lvbiI6MiwianRpIjoiNTliYzY2OTktYjIwMS00NDUzLWE5MzEtYzUzNDNlYWM4MTdlIiwiY2xpZW50X2lkIjoiZ2IyNnRzcmd0ZWhzaHRwZ2RsMGMxZ3BxNiJ9.nHe9R5czY7l72Nfu9fCuxCEbp7S__PM95iSYQI51I12Qa2OiSuMAmUmEnNNZboPzw-q1fdiGLAT9sia5umzFyBvVtfsN0MLy82ocxBfC8lq-jLg3FQQbTa4qpnjkuZfzbGOlcFQMFCctlsYPYpc21ocfmkZgUifuX4hBbvCdGEv0GUPMG9YHIRD4njQsfne_-2jZlenPNcoHkJZBEV1as1p9xjPv6QQpqhdnKVgWKA27RPiig4zrH4rfjW6XoIa3l6UjGdxTCMac9WJ6kWcfHjHYo0M_ecC8svyPTmA5vZxp50PpBq9cqZlhxnSHvQBrI4nKq6HSZVimzqioin-vsg"
+  },
+  "root_group": {
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [],
+    "checks": []
+  },
+  "options": {
+    "summaryTrendStats": [
+      "min",
+      "med",
+      "avg",
+      "p(90)",
+      "p(95)",
+      "p(99)",
+      "max"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  },
+  "state": {
+    "isStdOutTTY": true,
+    "isStdErrTTY": true,
+    "testRunDurationMs": 779.7126
+  }
+}

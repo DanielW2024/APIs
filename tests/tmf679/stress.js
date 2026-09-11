@@ -1,4 +1,4 @@
-// tests/tmf679/stress.js
+// tests/tmf679/polygon_stress.js
 
 import {
 check,

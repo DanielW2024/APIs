@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Prueba de Estrés - TMF702</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #1a237e, #0d47a1); color: white; padding: 25px 30px; border-radius: 12px; margin-bottom: 20px; }
+        .header h1 { font-size: 24px; font-weight: 300; }
+        .header .subtitle { opacity: 0.8; margin-top: 3px; font-size: 14px; }
+        .status-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-weight: bold; margin-top: 8px; font-size: 14px; }
+        .status-passed { background: #4CAF50; color: white; }
+        .status-warning { background: #FF9800; color: white; }
+        .status-failed { background: #f44336; color: white; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .card .value { font-size: 24px; font-weight: bold; color: #1a237e; }
+        .card .label { font-size: 12px; color: #666; margin-top: 3px; }
+        .config-box { background: white; padding: 18px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        .config-box h2 { font-size: 16px; color: #333; margin-bottom: 12px; }
+        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .config-item { background: #f8f9ff; padding: 10px 14px; border-radius: 6px; border-left: 3px solid #1a237e; }
+        .config-item .config-label { font-size: 11px; color: #666; text-transform: uppercase; }
+        .config-item .config-value { font-size: 15px; font-weight: bold; color: #1a237e; }
+        .stages-list { margin-top: 10px; background: #f8f9ff; padding: 12px 15px; border-radius: 6px; font-size: 14px; }
+        .chart-container { background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        .chart-container h2 { font-size: 13px; color: #333; margin-bottom: 4px; }
+        .box-info { background: #e3f2fd; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #1976D2; }
+        .box-scroll { max-height: 80px; overflow-y: auto; background: white; padding: 8px 10px; border-radius: 4px; margin-top: 6px; border: 1px solid #bbdefb; }
+        .box-scroll::-webkit-scrollbar { width: 4px; }
+        .box-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 2px; }
+        .box-scroll::-webkit-scrollbar-thumb { background: #1976D2; border-radius: 2px; }
+        .box-tag { display: inline-block; background: #e3f2fd; padding: 1px 6px; margin: 1px; border-radius: 3px; font-family: monospace; font-size: 11px; border: 1px solid #bbdefb; }
+        .badge-count { display: inline-block; background: #1976D2; color: white; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .footer { text-align: center; padding: 15px; color: #999; font-size: 12px; margin-top: 15px; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge-green { background: #4CAF50; color: white; }
+        .badge-orange { background: #FF9800; color: white; }
+        .badge-red { background: #f44336; color: white; }
+        .recommendation { background: #fff3e0; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #FF6F00; margin-top: 15px; }
+        .recommendation h3 { font-size: 16px; color: #e65100; margin-bottom: 6px; }
+        .recommendation p { font-size: 14px; }
+        .top5 { background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-top: 15px; }
+        .top5 h2 { font-size: 16px; color: #333; margin-bottom: 10px; }
+        .top5 .req-name { font-weight: 600; color: #1a237e; font-size: 13px; }
+        .top5 .req-url { color: #666; font-size: 11px; font-family: monospace; }
+        .metric-bar { height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .metric-bar-fill { height: 100%; border-radius: 3px; }
+        .bar-green { background: #4CAF50; }
+        .bar-orange { background: #FF9800; }
+        .bar-red { background: #f44336; }
+        .bar-blue { background: #1976D2; }
+        .highlight-slow { color: #f44336; font-weight: bold; }
+        .highlight-medium { color: #FF9800; }
+        .highlight-fast { color: #4CAF50; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-size: 13px; }
+        th { background: #1a237e; color: white; padding: 10px 12px; text-align: left; font-weight: 500; font-size: 12px; }
+        td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+        tr:hover { background: #f8f9ff; }
+        .detail-table { margin-top: 15px; }
+        .detail-table th { font-size: 11px; }
+        .detail-table td { font-size: 12px; }
+        .note { background: #fff8e1; padding: 8px 15px; border-radius: 6px; font-size: 12px; color: #666; margin-top: 10px; border-left: 3px solid #FFC107; }
+        .error-note { background: #ffebee; padding: 8px 15px; border-radius: 6px; font-size: 12px; color: #c62828; margin-top: 10px; border-left: 3px solid #f44336; }
+        .success-note { background: #e8f5e9; padding: 8px 15px; border-radius: 6px; font-size: 12px; color: #2e7d32; margin-top: 10px; border-left: 3px solid #4CAF50; }
+        .datetime-info { background: #e8eaf6; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #3f51b5; display: flex; justify-content: flex-start; flex-wrap: wrap; font-size: 13px; gap: 20px; }
+        .datetime-info .label { color: #666; }
+        .datetime-info .value { font-weight: bold; color: #1a237e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Reporte de Prueba de Estrés - TMF702</h1>
+            <div class="subtitle">API: Búsqueda de Cajas (Resource)</div>
+            <div class="subtitle">Tipo: Stress Test</div>
+            <div class="status-badge status-passed">
+                ✅ APROBADO
+            </div>
+        </div>
+
+        <div class="datetime-info">
+            <div>
+                <span class="label">📅 Inicio:</span>
+                <span class="value">09/11/2026, 15:57:43</span>
+            </div>
+            <div>
+                <span class="label">⏱️ Timestamp:</span>
+                <span class="value">155743321</span>
+            </div>
+        </div>
+
+        <div class="config-box">
+            <h2>⚙️ Configuración de la Prueba</h2>
+            <div class="config-grid">
+                <div class="config-item">
+                    <div class="config-label">TPS Objetivo</div>
+                    <div class="config-value">[object Object] TPS</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Máximo de VUs</div>
+                    <div class="config-value">1</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Duración</div>
+                    <div class="config-value">3m0s</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Peticiones a la API</div>
+                    <div class="config-value">378</div>
+                </div>
+            </div>
+            <div class="stages-list">
+                <strong>Detalle de Stages:</strong>
+                <span style="margin-left: 10px;">Stage 1: 3m0s → 👥 [object Object] VUs</span>
+            </div>
+        </div>
+
+        <div class="box-info">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <strong>📦 Cajas disponibles:</strong>
+                    <span class="badge-count">1000</span>
+                </div>
+                <span style="font-size: 12px; color: #666;">Asignación secuencial (orden del CSV)</span>
+            </div>
+            <div class="box-scroll">
+                <span class="box-tag">23395</span><span class="box-tag">24987</span><span class="box-tag">27526</span><span class="box-tag">29072</span><span class="box-tag">29624</span><span class="box-tag">29662</span><span class="box-tag">31652</span><span class="box-tag">31657</span><span class="box-tag">31665</span><span class="box-tag">31666</span><span class="box-tag">31667</span><span class="box-tag">31668</span><span class="box-tag">31669</span><span class="box-tag">31670</span><span class="box-tag">31671</span><span class="box-tag">31672</span><span class="box-tag">31673</span><span class="box-tag">31674</span><span class="box-tag">31675</span><span class="box-tag">31676</span>
+                <span class="box-tag" style="background: #e0e0e0;">... +980 más</span>
+            </div>
+        </div>
+
+        
+        <div class="success-note">
+            ✅ <strong>¡ÉXITO!</strong> Todas las peticiones a la API fueron exitosas.
+            <br><br>
+            <strong>📊 Resumen:</strong>
+            <ul style="margin-left: 20px; margin-top: 5px;">
+                <li>✅ Peticiones exitosas: 378</li>
+                <li>📈 Tasa de éxito: 100.0%</li>
+                <li>⏱️ Tiempo promedio: 172ms</li>
+                <li>👥 Usuarios concurrentes: 1</li>
+                <li>📦 Cajas usadas: 378 de 1000</li>
+            </ul>
+        </div>
+        
+
+        <div class="grid">
+            <div class="card">
+                <div class="value">378</div>
+                <div class="label">Peticiones a la API</div>
+            </div>
+            <div class="card">
+                <div class="value" style="color: #4CAF50">210ms</div>
+                <div class="label">Tiempo p(95)</div>
+                <div class="metric-bar"><div class="metric-bar-fill bar-green" style="width: 4.1958648%"></div></div>
+            </div>
+            <div class="card">
+                <div class="value" style="color: #4CAF50">100.0%</div>
+                <div class="label">Tasa de Éxito</div>
+            </div>
+            <div class="card">
+                <div class="value">1</div>
+                <div class="label">Usuarios Concurrentes</div>
+            </div>
+            <div class="card">
+                <div class="value" style="color: #4CAF50">172ms</div>
+                <div class="label">Tiempo Promedio</div>
+            </div>
+            <div class="card">
+                <div class="value" style="color: #4CAF50">621ms</div>
+                <div class="label">Tiempo Máximo</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>📊 Distribución de Tiempos de Respuesta</h2>
+            <canvas id="percentileChart" height="120"></canvas>
+        </div>
+
+        <div class="top5">
+            <h2>📈 Métricas de la API</h2>
+            <p style="color:#666; font-size:12px; margin-bottom:8px;">Métricas de la petición TMF702 /resource (excluye token)</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Request</th>
+                        <th>Promedio (ms)</th>
+                        <th>p(90)</th>
+                        <th>p(95)</th>
+                        <th>p(99)</th>
+                        <th>Mínimo</th>
+                        <th>Máximo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="req-name">POST - TMF702</div>
+                            <div class="req-url">/tmf702/resource</div>
+                        </td>
+                        <td class="highlight-fast">172</td>
+                        <td>193</td>
+                        <td>210</td>
+                        <td>267</td>
+                        <td>135</td>
+                        <td>621</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail-table">
+            <div style="background: white; padding: 15px 20px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                <h2 style="font-size: 16px; color: #333;">📋 Métricas Detalladas</h2>
+                <p style="font-size: 12px; color: #666;">Excluye la petición del token (1 sola vez) - 378 peticiones a la API</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Mínimo</th>
+                        <th>Mediana</th>
+                        <th>Promedio</th>
+                        <th>p(90)</th>
+                        <th>p(95)</th>
+                        <th>p(99)</th>
+                        <th>Máximo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tiempo de Respuesta</strong></td>
+                        <td>135ms</td>
+                        <td>168ms</td>
+                        <td>172ms</td>
+                        <td>193ms</td>
+                        <td>210ms</td>
+                        <td>267ms</td>
+                        <td>621ms</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fallos</strong></td>
+                        <td colspan="7" style="text-align:center; font-weight:bold; color: #4CAF50">
+                            0 fallos (0.00%)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="note">
+                📌 El token se obtiene 1 sola vez y no se incluye en las métricas.
+                Peticiones totales (con token): 379 | Peticiones a la API (sin token): 378
+                 | ✅ Todas las peticiones a la API fueron exitosas.
+            </div>
+        </div>
+
+        <div class="recommendation">
+            <h3>💡 Recomendación</h3>
+            
+                <p>✅ <strong>Excelente rendimiento</strong> - El sistema responde correctamente con 1 usuarios concurrentes.</p>
+                <p><span class="badge badge-green">RENDIMIENTO ÓPTIMO</span></p>
+                <p>📍 Se usaron 378 cajas diferentes del CSV</p>
+            
+        </div>
+
+        <div class="footer">
+            Reporte generado con k6 - 09/11/2026, 15:57:43
+            <br>API: TMF702 - Búsqueda de Cajas (/resource)
+            <br>378 peticiones a la API • 1 VUs • 3m0s
+            <br>📦 Cajas del CSV (1000 disponibles) • Asignación secuencial
+            ✅ Todas las peticiones exitosas
+        </div>
+    </div>
+
+    <script>
+        new Chart(document.getElementById('percentileChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Mínimo', 'Mediana', 'Promedio', 'p(90)', 'p(95)', 'p(99)', 'Máximo'],
+                datasets: [{
+                    label: 'Tiempo de Respuesta (ms)',
+                    data: [135, 168, 172, 193, 210, 267, 621],
+                    backgroundColor: ['#4CAF50', '#1976D2', '#2196F3', '#FF9800', '#FF6F00', '#f44336', '#C62828'],
+                    borderRadius: 4,
+                    barThickness: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + 'ms';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'ms', font: { size: 9 } },
+                        ticks: { font: { size: 9 } }
+                    },
+                    x: {
+                        ticks: { font: { size: 9 } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

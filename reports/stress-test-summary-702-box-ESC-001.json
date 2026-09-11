@@ -1,0 +1,30 @@
+{
+  "test": "TMF 702 Box",
+  "type": "Constant Arrival Rate",
+  "scenario": "ESC-001",
+  "startTime": "24/08/2026 15:08:50",
+  "targetRate": 5,
+  "duration": "10s",
+  "durationSeconds": 10,
+  "realDurationSeconds": 10.98,
+  "realDuration": "10.98 s",
+  "expectedTransactions": 50,
+  "boxesAvailable": 10,
+  "iterations": 50,
+  "httpRequests": 51,
+  "successfulChecks": 50,
+  "failedChecks": 0,
+  "errorRate": 0,
+  "throughput": 4.56,
+  "throughputPercentage": 91.11,
+  "maxVUs": 5,
+  "responseTime": {
+    "min": 134.98,
+    "median": 175.84,
+    "average": 191.99,
+    "p90": 226.91,
+    "p95": 257.56,
+    "p99": 401.24,
+    "max": 522.48
+  }
+}

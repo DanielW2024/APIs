@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Reporte ESC-002 - TMF 702
+</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    padding: 30px;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        #f3f4f6;
+
+    color:
+        #1f2937;
+}
+
+.container {
+
+    max-width:
+        1200px;
+
+    margin:
+        0 auto;
+}
+
+.header {
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #1f2937
+        );
+
+    color:
+        white;
+
+    padding:
+        30px;
+
+    border-radius:
+        16px;
+
+    margin-bottom:
+        24px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, .12);
+}
+
+.header h1 {
+
+    margin:
+        0 0 10px 0;
+
+    font-size:
+        30px;
+}
+
+.header p {
+
+    margin:
+        7px 0;
+
+    color:
+        #d1d5db;
+}
+
+.header strong {
+
+    color:
+        white;
+}
+
+.status {
+
+    display:
+        inline-block;
+
+    margin-top:
+        20px;
+
+    padding:
+        12px 22px;
+
+    border-radius:
+        30px;
+
+    font-size:
+        18px;
+
+    font-weight:
+        bold;
+}
+
+.status.approved {
+
+    background:
+        #dcfce7;
+
+    color:
+        #166534;
+}
+
+.status.failed {
+
+    background:
+        #fee2e2;
+
+    color:
+        #991b1b;
+}
+
+.grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px, 1fr)
+        );
+
+    gap:
+        16px;
+
+    margin-bottom:
+        24px;
+}
+
+.card {
+
+    background:
+        white;
+
+    padding:
+        22px;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 3px 12px
+        rgba(0, 0, 0, .07);
+}
+
+.card .label {
+
+    color:
+        #6b7280;
+
+    font-size:
+        14px;
+
+    margin-bottom:
+        8px;
+}
+
+.card .value {
+
+    font-size:
+        28px;
+
+    font-weight:
+        bold;
+
+    color:
+        #111827;
+}
+
+.section {
+
+    background:
+        white;
+
+    padding:
+        25px;
+
+    border-radius:
+        14px;
+
+    margin-bottom:
+        24px;
+
+    box-shadow:
+        0 3px 12px
+        rgba(0, 0, 0, .07);
+}
+
+.section h2 {
+
+    margin-top:
+        0;
+
+    color:
+        #111827;
+}
+
+table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+}
+
+th,
+td {
+
+    padding:
+        13px;
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    text-align:
+        left;
+}
+
+th {
+
+    background:
+        #f9fafb;
+
+    font-weight:
+        bold;
+}
+
+.good {
+
+    color:
+        #16a34a;
+
+    font-weight:
+        bold;
+}
+
+.bad {
+
+    color:
+        #dc2626;
+
+    font-weight:
+        bold;
+}
+
+.scenario-box {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px, 1fr)
+        );
+
+    gap:
+        15px;
+
+    margin-top:
+        15px;
+}
+
+.scenario-card {
+
+    background:
+        #f8fafc;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        12px;
+
+    padding:
+        18px;
+
+    text-align:
+        center;
+}
+
+.scenario-card .title {
+
+    color:
+        #64748b;
+
+    font-size:
+        13px;
+
+    margin-bottom:
+        8px;
+}
+
+.scenario-card .number {
+
+    color:
+        #111827;
+
+    font-size:
+        25px;
+
+    font-weight:
+        bold;
+}
+
+.bar-container {
+
+    background:
+        #e5e7eb;
+
+    border-radius:
+        20px;
+
+    height:
+        30px;
+
+    overflow:
+        hidden;
+
+    margin:
+        10px 0 20px;
+}
+
+.bar {
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        white;
+
+    font-weight:
+        bold;
+
+    background:
+        linear-gradient(
+            90deg,
+            #22c55e,
+            #16a34a
+        );
+
+    min-width:
+        40px;
+}
+
+.chart {
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+    justify-content:
+        space-around;
+
+    height:
+        260px;
+
+    padding:
+        30px 20px 20px;
+
+    background:
+        #f9fafb;
+
+    border-radius:
+        12px;
+}
+
+.chart-bar {
+
+    width:
+        9%;
+
+    min-height:
+        5px;
+
+    border-radius:
+        8px 8px 0 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #3b82f6,
+            #1d4ed8
+        );
+
+    position:
+        relative;
+}
+
+.chart-bar span {
+
+    position:
+        absolute;
+
+    bottom:
+        100%;
+
+    left:
+        50%;
+
+    transform:
+        translateX(-50%);
+
+    margin-bottom:
+        5px;
+
+    font-size:
+        11px;
+
+    white-space:
+        nowrap;
+
+    text-align:
+        center;
+}
+
+.footer {
+
+    text-align:
+        center;
+
+    color:
+        #6b7280;
+
+    padding:
+        20px;
+}
+
+@media print {
+
+    body {
+
+        background:
+            white;
+
+        padding:
+            0;
+    }
+
+    .card,
+    .section,
+    .header {
+
+        box-shadow:
+            none;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>
+            📊 Reporte de Prueba de Estrés
+        </h1>
+
+        <p>
+            <strong>
+                TMF 702 - Búsqueda de Cajas
+            </strong>
+        </p>
+
+        <p>
+            Tipo:
+            Constant Arrival Rate
+        </p>
+
+        <p>
+            Escenario:
+            <strong>
+                ESC-002
+            </strong>
+        </p>
+
+        <p>
+            TPS planificados:
+            <strong>
+                10 TPS
+            </strong>
+        </p>
+
+        <p>
+            Período:
+            <strong>
+                10 segundos
+            </strong>
+        </p>
+
+        <p>
+            TXN esperadas:
+            <strong>
+                90
+            </strong>
+        </p>
+
+        <p>
+            Inicio:
+            24/08/2026 14:36:40
+        </p>
+
+        <p>
+            Duración:
+            10s
+        </p>
+
+        <div class="status failed">
+
+            ❌
+
+            FALLIDO
+
+        </div>
+
+    </div>
+
+
+    <!-- PLAN DE PRUEBA -->
+
+    <div class="section">
+
+        <h2>
+            🎯 Plan de Prueba
+        </h2>
+
+        <div class="scenario-box">
+
+            <div class="scenario-card">
+
+                <div class="title">
+                    Escenario
+                </div>
+
+                <div class="number">
+                    ESC-002
+                </div>
+
+            </div>
+
+            <div class="scenario-card">
+
+                <div class="title">
+                    TPS planificados
+                </div>
+
+                <div class="number">
+                    10
+                </div>
+
+            </div>
+
+            <div class="scenario-card">
+
+                <div class="title">
+                    Período
+                </div>
+
+                <div class="number">
+                    10s
+                </div>
+
+            </div>
+
+            <div class="scenario-card">
+
+                <div class="title">
+                    TXN esperadas
+                </div>
+
+                <div class="number">
+                    90
+                </div>
+
+            </div>
+
+            <div class="scenario-card">
+
+                <div class="title">
+                    TXN ejecutadas
+                </div>
+
+                <div class="number">
+                    62
+                </div>
+
+            </div>
+
+            <div class="scenario-card">
+
+                <div class="title">
+                    Cumplimiento TXN
+                </div>
+
+                <div class="number bad">
+                    68.89%
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- KPIs -->
+
+    <div class="grid">
+
+        <div class="card">
+
+            <div class="label">
+                Peticiones HTTP
+            </div>
+
+            <div class="value">
+                62
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                TPS objetivo
+            </div>
+
+            <div class="value">
+                10.00 TPS
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Throughput real
+            </div>
+
+            <div class="value">
+                6.20 TPS
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Tasa de éxito
+            </div>
+
+            <div class="value good">
+                100.00%
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Error Rate
+            </div>
+
+            <div class="value good">
+
+                0.00%
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Max VUs
+            </div>
+
+            <div class="value">
+                8
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Promedio
+            </div>
+
+            <div class="value">
+                183 ms
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                p95
+            </div>
+
+            <div class="value">
+                263 ms
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONFIGURACIÓN -->
+
+    <div class="section">
+
+        <h2>
+            📋 Configuración de la Prueba
+        </h2>
+
+        <table>
+
+            <tr>
+                <th>
+                    Parámetro
+                </th>
+
+                <th>
+                    Valor
+                </th>
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Escenario
+                </td>
+
+                <td>
+                    <strong>
+                        ESC-002
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Tipo de prueba
+                </td>
+
+                <td>
+                    Constant Arrival Rate
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    TPS objetivo
+                </td>
+
+                <td>
+                    <strong>
+                        10 TPS
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Período
+                </td>
+
+                <td>
+                    10 segundos
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    TXN esperadas
+                </td>
+
+                <td>
+                    <strong>
+                        90
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Requests ejecutados
+                </td>
+
+                <td>
+                    62
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Iteraciones
+                </td>
+
+                <td>
+                    61
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Cajas disponibles
+                </td>
+
+                <td>
+                    10
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Max VUs
+                </td>
+
+                <td>
+                    8
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- RESULTADO -->
+
+    <div class="section">
+
+        <h2>
+            📊 Resultado
+        </h2>
+
+        <table>
+
+            <tr>
+
+                <th>
+                    Métrica
+                </th>
+
+                <th>
+                    Valor
+                </th>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Escenario
+                </td>
+
+                <td>
+                    <strong>
+                        ESC-002
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    TPS planificados
+                </td>
+
+                <td>
+                    <strong>
+                        10 TPS
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Período
+                </td>
+
+                <td>
+                    10 segundos
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    TXN esperadas
+                </td>
+
+                <td>
+                    <strong>
+                        90
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    TXN ejecutadas
+                </td>
+
+                <td>
+                    <strong>
+                        62
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Cumplimiento TXN
+                </td>
+
+                <td class="bad">
+                    68.89%
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Peticiones HTTP
+                </td>
+
+                <td>
+                    62
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Iteraciones
+                </td>
+
+                <td>
+                    61
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Checks exitosos
+                </td>
+
+                <td class="good">
+                    61
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Checks fallidos
+                </td>
+
+                <td class="good">
+
+                    0
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Throughput objetivo
+                </td>
+
+                <td>
+                    10.00 TPS
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Throughput real
+                </td>
+
+                <td>
+                    6.20 TPS
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Cumplimiento throughput
+                </td>
+
+                <td class="bad">
+
+                    62.00%
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Tasa de éxito
+                </td>
+
+                <td class="good">
+                    100.00%
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Error Rate
+                </td>
+
+                <td class="good">
+
+                    0.00%
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Resultado
+                </td>
+
+                <td class="bad">
+
+                    ❌
+
+                    FALLIDO
+
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- TIEMPOS -->
+
+    <div class="section">
+
+        <h2>
+            ⏱️ Distribución de Tiempos
+        </h2>
+
+        <table>
+
+            <tr>
+
+                <th>
+                    Métrica
+                </th>
+
+                <th>
+                    Tiempo
+                </th>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Mínimo
+                </td>
+
+                <td>
+                    136 ms
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Mediana
+                </td>
+
+                <td>
+                    170 ms
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Promedio
+                </td>
+
+                <td>
+                    183 ms
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    p90
+                </td>
+
+                <td>
+                    238 ms
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    p95
+                </td>
+
+                <td>
+                    <strong>
+                        263 ms
+                    </strong>
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    p99
+                </td>
+
+                <td>
+                    425 ms
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Máximo
+                </td>
+
+                <td>
+                    537 ms
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- THROUGHPUT -->
+
+    <div class="section">
+
+        <h2>
+            📈 TPS Objetivo vs TPS Real
+        </h2>
+
+        <p>
+
+            TPS objetivo:
+
+            <strong>
+                10.00 TPS
+            </strong>
+
+        </p>
+
+        <p>
+
+            TPS real:
+
+            <strong>
+                6.20 TPS
+            </strong>
+
+        </p>
+
+        <div class="bar-container">
+
+            <div
+                class="bar"
+                style="width: 62.00%"
+            >
+
+                6.20 TPS
+
+            </div>
+
+        </div>
+
+        <p>
+
+            Cumplimiento:
+
+            <strong>
+                62.00%
+            </strong>
+
+        </p>
+
+    </div>
+
+
+    <!-- LATENCIA -->
+
+    <div class="section">
+
+        <h2>
+            📊 Distribución de Latencia
+        </h2>
+
+        <div class="chart">
+
+
+            <div
+                class="chart-bar"
+                style="height: 25.341355736452876%"
+            >
+
+                <span>
+
+                    Min<br>
+
+                    136 ms
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="chart-bar"
+                style="height: 31.693459754484653%"
+            >
+
+                <span>
+
+                    Med<br>
+
+                    170 ms
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="chart-bar"
+                style="height: 34.01449248365404%"
+            >
+
+                <span>
+
+                    Avg<br>
+
+                    183 ms
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="chart-bar"
+                style="height: 44.362274835609036%"
+            >
+
+                <span>
+
+                    p90<br>
+
+                    238 ms
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="chart-bar"
+                style="height: 48.94286831957975%"
+            >
+
+                <span>
+
+                    p95<br>
+
+                    263 ms
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="chart-bar"
+                style="height: 79.16286347633329%"
+            >
+
+                <span>
+
+                    p99<br>
+
+                    425 ms
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="chart-bar"
+                style="height: 100%"
+            >
+
+                <span>
+
+                    Max<br>
+
+                    537 ms
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- RECOMENDACIÓN -->
+
+    <div class="section">
+
+        <h2>
+            📌 Recomendación
+        </h2>
+
+
+        
+
+                    <p class="bad">
+
+                        ❌ La prueba no cumplió
+                        los thresholds configurados.
+
+                    </p>
+
+
+                    <p>
+
+                        🎯 Escenario:
+
+                        <strong>
+                            ESC-002
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        🚀 TPS planificados:
+
+                        <strong>
+                            10 TPS
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        📊 TXN esperadas:
+
+                        <strong>
+                            90
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        📊 TXN ejecutadas:
+
+                        <strong>
+                            62
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        📈 Cumplimiento TXN:
+
+                        <strong>
+                            68.89%
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        📊 Throughput obtenido:
+
+                        <strong>
+                            6.20 TPS
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        ❌ Error Rate:
+
+                        <strong>
+                            0.00%
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        ⏱️ p95:
+
+                        <strong>
+                            263 ms
+                        </strong>
+
+                    </p>
+
+                
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="footer">
+
+        Reporte generado automáticamente con k6
+
+        <br>
+
+        TMF 702 - Búsqueda de Cajas
+
+        <br>
+
+        Escenario:
+        ESC-002
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

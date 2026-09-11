@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="k6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/k6.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

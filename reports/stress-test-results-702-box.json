@@ -1,0 +1,18 @@
+{
+  "targetRps": 10,
+  "duration": "10s",
+  "iterations": 74,
+  "httpRequests": 1,
+  "successRate": 0,
+  "errorRate": 0,
+  "throughput": 7.4,
+  "maxVUs": 5,
+  "min": 555.3919,
+  "median": 555.3919,
+  "average": 555.3919,
+  "p90": 555.3919,
+  "p95": 555.3919,
+  "p99": 555.3919,
+  "max": 555.3919,
+  "passed": true
+}

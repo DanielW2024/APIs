@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Prueba de Estrés - TMF 702 Box</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #1a237e, #0d47a1); color: white; padding: 25px 30px; border-radius: 12px; margin-bottom: 20px; }
+        .header h1 { font-size: 24px; font-weight: 300; }
+        .header .subtitle { opacity: 0.8; margin-top: 3px; font-size: 14px; }
+        .status-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-weight: bold; margin-top: 8px; font-size: 14px; }
+        .status-passed { background: #4CAF50; color: white; }
+        .status-failed { background: #f44336; color: white; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .card .value { font-size: 24px; font-weight: bold; color: #1a237e; }
+        .card .label { font-size: 12px; color: #666; margin-top: 3px; }
+        .config-box { background: white; padding: 18px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        .config-box h2 { font-size: 16px; color: #333; margin-bottom: 12px; }
+        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .config-item { background: #f8f9ff; padding: 10px 14px; border-radius: 6px; border-left: 3px solid #1a237e; }
+        .config-item .config-label { font-size: 11px; color: #666; text-transform: uppercase; }
+        .config-item .config-value { font-size: 15px; font-weight: bold; color: #1a237e; }
+        .stages-list { margin-top: 10px; background: #f8f9ff; padding: 12px 15px; border-radius: 6px; font-size: 14px; }
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .chart-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .chart-container h2 { font-size: 14px; color: #333; margin-bottom: 10px; }
+        .chart-container canvas { max-height: 200px; }
+        .footer { text-align: center; padding: 15px; color: #999; font-size: 12px; margin-top: 15px; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge-green { background: #4CAF50; color: white; }
+        .badge-red { background: #f44336; color: white; }
+        .recommendation { background: #fff3e0; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #FF6F00; margin-top: 15px; }
+        .recommendation h3 { font-size: 16px; color: #e65100; margin-bottom: 6px; }
+        .recommendation p { font-size: 14px; }
+        .metric-bar { height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .metric-bar-fill { height: 100%; border-radius: 3px; }
+        .bar-green { background: #4CAF50; }
+        .bar-orange { background: #FF9800; }
+        .bar-red { background: #f44336; }
+        .bar-blue { background: #1976D2; }
+        .highlight-slow { color: #f44336; font-weight: bold; }
+        .highlight-medium { color: #FF9800; }
+        .highlight-fast { color: #4CAF50; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-size: 13px; }
+        th { background: #1a237e; color: white; padding: 10px 12px; text-align: left; font-weight: 500; font-size: 12px; }
+        td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+        tr:hover { background: #f8f9ff; }
+        .detail-table { margin-top: 15px; }
+        .detail-table th { font-size: 11px; }
+        .detail-table td { font-size: 12px; }
+        .note { background: #fff8e1; padding: 8px 15px; border-radius: 6px; font-size: 12px; color: #666; margin-top: 10px; border-left: 3px solid #FFC107; }
+        .error-note { background: #ffebee; padding: 8px 15px; border-radius: 6px; font-size: 12px; color: #c62828; margin-top: 10px; border-left: 3px solid #f44336; }
+        .success-note { background: #e8f5e9; padding: 8px 15px; border-radius: 6px; font-size: 12px; color: #2e7d32; margin-top: 10px; border-left: 3px solid #4CAF50; }
+        .datetime-info { background: #e8eaf6; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #3f51b5; display: flex; justify-content: flex-start; flex-wrap: wrap; font-size: 13px; gap: 20px; }
+        .datetime-info .label { color: #666; }
+        .datetime-info .value { font-weight: bold; color: #1a237e; }
+        .box-info { background: #e3f2fd; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #1976D2; }
+        .box-scroll { max-height: 80px; overflow-y: auto; background: white; padding: 8px 10px; border-radius: 4px; margin-top: 6px; border: 1px solid #bbdefb; }
+        .box-scroll::-webkit-scrollbar { width: 4px; }
+        .box-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 2px; }
+        .box-scroll::-webkit-scrollbar-thumb { background: #1976D2; border-radius: 2px; }
+        .box-tag { display: inline-block; background: #e3f2fd; padding: 1px 6px; margin: 1px; border-radius: 3px; font-family: monospace; font-size: 11px; border: 1px solid #bbdefb; }
+        .badge-count { display: inline-block; background: #1976D2; color: white; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .metric-highlight { font-size: 13px; color: #666; }
+        .metric-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
+        .metric-row:last-child { border-bottom: none; }
+        .summary-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-top: 15px; }
+        .summary-box h2 { font-size: 16px; color: #333; margin-bottom: 10px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+        .summary-item { background: #f8f9ff; padding: 12px 16px; border-radius: 6px; border-left: 3px solid #1976D2; }
+        .summary-item .summary-value { font-size: 20px; font-weight: bold; color: #1a237e; }
+        .summary-item .summary-label { font-size: 11px; color: #666; text-transform: uppercase; }
+        .summary-item.error .summary-value { color: #f44336; }
+        .summary-item.success .summary-value { color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Reporte de Prueba de Estrés - TMF 702 Box</h1>
+            <div class="subtitle">API: Búsqueda de Cajas</div>
+            <div class="subtitle">Tipo: Stress Test</div>
+            <div class="status-badge status-passed">
+                ✅ APROBADO
+            </div>
+        </div>
+
+        <div class="datetime-info">
+            <div>
+                <span class="label">📅 Inicio:</span>
+                <span class="value">08/21/2026, 15:40:13</span>
+            </div>
+            <div>
+                <span class="label">⏱️ Duración:</span>
+                <span class="value">10s</span>
+            </div>
+            <div>
+                <span class="label">👥 VUs:</span>
+                <span class="value">5</span>
+            </div>
+        </div>
+
+        <!-- CONFIGURACIÓN -->
+        <div class="config-box">
+            <h2>Configuración de la Prueba</h2>
+            <div class="config-grid">
+                <div class="config-item">
+                    <div class="config-label">VUs</div>
+                    <div class="config-value">5</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Duración</div>
+                    <div class="config-value">10s</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Peticiones a la API</div>
+                    <div class="config-value">100</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Throughput</div>
+                    <div class="config-value">10.00 req/s</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Error Rate</div>
+                    <div class="config-value" style="color: #4CAF50">0.00%</div>
+                </div>
+            </div>
+            <div class="stages-list">
+                <strong>Configuración:</strong>
+                <span style="margin-left: 10px;">👥 5 VUs constantes durante 10s</span>
+            </div>
+        </div>
+
+        <!-- CAJAS DISPONIBLES -->
+        <div class="box-info">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <strong>📋 Cajas disponibles:</strong>
+                    <span class="badge-count">10</span>
+                </div>
+                <span style="font-size: 12px; color: #666;">Asignación secuencial (orden del CSV)</span>
+            </div>
+            <div class="box-scroll">
+                <span class="box-tag">2276026</span><span class="box-tag">2276020</span><span class="box-tag">2088353</span><span class="box-tag">2088352</span><span class="box-tag">2088351</span><span class="box-tag">2088350</span><span class="box-tag">2088346</span><span class="box-tag">2088345</span><span class="box-tag">2088344</span><span class="box-tag">2088343</span>
+                
+            </div>
+            <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                <strong>Total cajas en CSV:</strong> 10
+                <span style="margin-left: 15px;">
+                    <strong>Peticiones realizadas:</strong> 100
+                </span>
+            </div>
+        </div>
+
+        <!-- NOTIFICACIÓN DE RESULTADO (UNA SOLA VEZ) -->
+        
+        <div class="success-note">
+            ✅ <strong>¡PRUEBA APROBADA!</strong> Todos los thresholds se cumplieron.
+            <br><br>
+            <strong>📊 Resumen:</strong>
+            <ul style="margin-left: 20px; margin-top: 5px;">
+                <li>✅ Peticiones exitosas: 100</li>
+                <li>📈 Tasa de éxito: 100.0%</li>
+                <li>⏱️ Tiempo promedio: 170ms</li>
+                <li>👥 Usuarios concurrentes: 5</li>
+                <li>📊 Throughput: 10.00 req/s</li>
+                <li>❌ Error Rate: 0.00%</li>
+            </ul>
+        </div>
+        
+
+        <!-- KPIs PRINCIPALES (UNA SOLA VEZ) -->
+        <div class="summary-box">
+            <h2>📊 KPIs Principales</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">100</div>
+                    <div class="summary-label">Peticiones a la API</div>
+                </div>
+                <div class="summary-item success">
+                    <div class="summary-value">100.0%</div>
+                    <div class="summary-label">Tasa de Éxito</div>
+                </div>
+                <div class="summary-item success">
+                    <div class="summary-value">0.00%</div>
+                    <div class="summary-label">Error Rate</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">5</div>
+                    <div class="summary-label">Usuarios Concurrentes</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">170ms</div>
+                    <div class="summary-label">Tiempo Promedio</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">207ms</div>
+                    <div class="summary-label">Tiempo p(95)</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">298ms</div>
+                    <div class="summary-label">Tiempo Máximo</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">10.00</div>
+                    <div class="summary-label">Throughput (req/s)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>📊 Distribución de Tiempos de Respuesta</h2>
+                <canvas id="percentileChart" height="180"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>📈 Throughput y Error Rate</h2>
+                <canvas id="throughputChart" height="180"></canvas>
+            </div>
+        </div>
+
+        <!-- TABLA DETALLADA (SOLO UNA VEZ) -->
+        <div class="detail-table">
+            <div style="background: white; padding: 15px 20px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                <h2 style="font-size: 16px; color: #333;">Métricas Detalladas</h2>
+                <p style="font-size: 12px; color: #666;">Excluye la petición del token (1 sola vez) - 100 peticiones a la API</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Mínimo</th>
+                        <th>Mediana</th>
+                        <th>Promedio</th>
+                        <th>p(90)</th>
+                        <th>p(95)</th>
+                        <th>p(99)</th>
+                        <th>Máximo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tiempo de Respuesta</strong></td>
+                        <td>133ms</td>
+                        <td>167ms</td>
+                        <td>170ms</td>
+                        <td>194ms</td>
+                        <td>207ms</td>
+                        <td>265ms</td>
+                        <td>298ms</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Estado</strong></td>
+                        <td colspan="7" style="text-align:center; font-weight:bold; color: #4CAF50">
+                            ✅ APROBADO
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="note">
+                📌 El token se obtiene 1 sola vez y no se incluye en las métricas.
+                Peticiones totales (con token): 101 | Peticiones a la API (sin token): 100
+                <br>📊 Throughput: 10.00 req/s | Error Rate: 0.00% | Umbral Error Rate: &lt; 5%
+            </div>
+        </div>
+
+        <!-- RECOMENDACIÓN -->
+        <div class="recommendation">
+            <h3>Recomendación</h3>
+            
+                <p>✅ <strong>Excelente rendimiento</strong> - El sistema responde correctamente con 5 usuarios concurrentes.</p>
+                <p><span class="badge badge-green">RENDIMIENTO ÓPTIMO</span></p>
+                <p style="margin-top: 5px; font-size: 13px;">📊 Throughput: 10.00 req/s | Error Rate: 0.00%</p>
+            
+        </div>
+
+        <div class="footer">
+            Reporte generado con k6 - 08/21/2026, 15:40:13
+            <br>API: TMF 702 - Búsqueda de Cajas
+            <br>100 peticiones a la API • 5 VUs • 10s
+            <br>📋 10 cajas en CSV
+            <br>📊 Throughput: 10.00 req/s • Error Rate: 0.00%
+            <br>✅ Prueba APROBADA
+        </div>
+    </div>
+
+    <script>
+        new Chart(document.getElementById('percentileChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Mínimo', 'Mediana', 'Promedio', 'p(90)', 'p(95)', 'p(99)', 'Máximo'],
+                datasets: [{
+                    label: 'Tiempo de Respuesta (ms)',
+                    data: [133, 167, 170, 194, 207, 265, 298],
+                    backgroundColor: ['#4CAF50', '#1976D2', '#2196F3', '#FF9800', '#FF6F00', '#f44336', '#C62828'],
+                    borderRadius: 4,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + 'ms';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'ms', font: { size: 9 } },
+                        ticks: { font: { size: 9 } }
+                    },
+                    x: {
+                        ticks: { font: { size: 9 } }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('throughputChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Throughput', 'Error Rate'],
+                datasets: [{
+                    label: 'Valores',
+                    data: [10.00, 0.00],
+                    backgroundColor: ['#1976D2', '#f44336'],
+                    borderRadius: 4,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataIndex === 0) {
+                                    return 'Throughput: ' + context.parsed.y + ' req/s';
+                                } else {
+                                    return 'Error Rate: ' + context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Valor', font: { size: 9 } },
+                        ticks: { font: { size: 9 } }
+                    },
+                    x: {
+                        ticks: { font: { size: 9 } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
