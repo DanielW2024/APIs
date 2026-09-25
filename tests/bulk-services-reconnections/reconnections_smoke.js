@@ -1,17 +1,16 @@
+// tests/bulk-services-reconnections/reconnections_smoke.js
 import { check, sleep } from 'k6';
-import { SharedArray } from 'k6/data';
 import { getTokenWithRetry } from '../../auth/tokenkong.js';
 import { postBulkReconnections } from '../../apis/bulk_services_reconnections.js';
 import { config } from '../../config/config1.js';
 
-const ordersPool = new SharedArray('reconnections-orders', function () {
-    return JSON.parse(open('../../data/bulk_orders_pool.json'));
-});
+// Órdenes hardcodeadas (sin archivo externo)
+const ORDERS = [
+    { orderCode: '11111',  serialNumber: '1313131313131313' },
+    { orderCode: '222222', serialNumber: '1414141414141414' },
+];
 
-export const options = {
-    stages: config.winet.test.stages,
-    thresholds: config.winet.test.thresholds,
-};
+export const options = config.winet.bulkTest;
 
 export function setup() {
     const token = getTokenWithRetry(3);
@@ -20,7 +19,7 @@ export function setup() {
 }
 
 export default function (data) {
-    const order = ordersPool[__VU % ordersPool.length];
+    const order = ORDERS[__ITER % ORDERS.length];
     const res = postBulkReconnections(data.token, [order]);
 
     // ===== LOGS DE RESPUESTA =====
@@ -33,12 +32,14 @@ export default function (data) {
     check(res, {
         'status es 200': (r) => r && r.status === 200,
         'respuesta tiene data[]': (r) => {
+            if (!r || !r.body) return false;
             try {
                 return Array.isArray(JSON.parse(r.body).data);
             } catch (e) {
-                return false; // body no es JSON (ej. HTML de error)
+                return false;
             }
         },
+        'status no es 429': (r) => r && r.status !== 429,
     });
 
     sleep(1);

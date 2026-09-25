@@ -3,136 +3,55 @@ import http from 'k6/http';
 import { sleep } from 'k6';
 import { config } from '../config/config1.js';
 
-// ==========================================
-// OBTENER TOKEN DE COGNITO
-// ==========================================
+const TOKEN_URL = config.cognitoUrl;
 
 export function getToken() {
-    console.log('🔑 Obteniendo token de Cognito...');
-
-    // --------------------------------------
-    // URL
-    // --------------------------------------
-
-    const url = config.cognitoUrl;
-
-    console.log(`🌐 Cognito URL: ${url}`);
-
-    // --------------------------------------
-    // Validaciones
-    // --------------------------------------
-
-    if (!config.cognitoUrl) {
-        console.error('❌ POLYGON_COGNITO_URL no está configurado.');
-        return null;
-    }
-
-    if (!config.cognito.clientId) {
-        console.error('❌ POLYGON_COGNITO_CLIENT_ID no está configurado.');
-        return null;
-    }
-
-    if (!config.cognito.clientSecret) {
-        console.error('❌ POLYGON_COGNITO_CLIENT_SECRET no está configurado.');
-        return null;
-    }
-
-    // --------------------------------------
-    // Payload (body)
-    // --------------------------------------
-
-    const payload = {
-        grant_type: config.cognito.grantType || 'client_credentials',
+    const payload = JSON.stringify({
+        grant_type: config.cognito.grantType,
         client_id: config.cognito.clientId,
-        client_secret: config.cognito.clientSecret
-    };
-
-    console.log(`📦 Payload: ${JSON.stringify(payload)}`);
-
-    // --------------------------------------
-    // Headers (PARAMETROS HTTP)
-    // --------------------------------------
+        client_secret: config.cognito.clientSecret,
+    });
 
     const params = {
         headers: {
-            'X-Channel': config.headers.channel || 'WIN',
+            'X-Channel': config.headers.channel,
             'X-Forwarded-Proto': 'https',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
         },
-        timeout: config.timeouts.tokenTimeout || 10000
+        tags: { name: 'cognito_token' },
     };
 
-    console.log(`📋 Headers: ${JSON.stringify(params.headers)}`);
+    const res = http.post(TOKEN_URL, payload, params);
 
-    // --------------------------------------
-    // Request
-    // --------------------------------------
-
-    try {
-        const response = http.post(url, JSON.stringify(payload), params);
-
-        console.log(`🔑 Token Status: ${response.status}`);
-
-        // ----------------------------------
-        // TOKEN OK
-        // ----------------------------------
-
-        if (response.status === 200) {
-            const body = JSON.parse(response.body);
-            const token = body.access_token;
-
-            if (token) {
-                console.log('✅ Token obtenido correctamente');
-                console.log(`📝 Token: ${token.substring(0, 20)}...`);
-                return token;
-            }
-
-            console.error('❌ Cognito respondió 200 pero no contiene access_token.');
-            console.error(`Respuesta Cognito: ${response.body}`);
-            return null;
-        }
-
-        // ----------------------------------
-        // ERROR HTTP
-        // ----------------------------------
-
-        console.error(`❌ Error al obtener token. HTTP Status: ${response.status}`);
-        console.error(`Respuesta Cognito: ${response.body}`);
-        return null;
-    } catch (error) {
-        console.error(`❌ Excepción obteniendo token: ${error.message}`);
+    if (res.status !== 200) {
+        console.error(`❌ Error al obtener token. HTTP Status: ${res.status}`);
+        console.error(`Respuesta Cognito: ${res.body}`);
         return null;
     }
+
+    const token = res.json('access_token');
+    if (!token) {
+        console.error(`❌ No se encontró access_token: ${res.body}`);
+        return null;
+    }
+
+    return token;
 }
 
-// ==========================================
-// OBTENER TOKEN CON REINTENTOS
-// ==========================================
-
-export function getTokenWithRetry(maxRetries = 3) {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        console.log(`🔄 Intento de token ${attempt}/${maxRetries}`);
-
+export function getTokenWithRetry(maxRetries = 3, delaySeconds = 2) {
+    for (let i = 1; i <= maxRetries; i++) {
+        console.log(`🔑 Intento de token ${i}/${maxRetries}`);
         const token = getToken();
-
-        // ----------------------------------
-        // TOKEN OBTENIDO
-        // ----------------------------------
-
         if (token) {
+            console.log('✅ Token obtenido correctamente');
             return token;
         }
-
-        // ----------------------------------
-        // RETRY
-        // ----------------------------------
-
-        if (attempt < maxRetries) {
-            console.log('⏳ Esperando 2 segundos antes de reintentar...');
-            sleep(2);
+        if (i < maxRetries) {
+            console.log(`⏳ Esperando ${delaySeconds}s antes de reintentar...`);
+            sleep(delaySeconds);
         }
     }
-
-    console.error(`❌ No se pudo obtener el token después de ${maxRetries} intentos`);
+    console.error('❌ No se pudo obtener token tras varios intentos');
     return null;
 }
