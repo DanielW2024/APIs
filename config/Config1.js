@@ -1,93 +1,131 @@
 // config/config.js
+
 export const config = {
-<<<<<<< HEAD
-    // URLs - VALORES FIJOS
+
+    // ==========================================
+    // URLs
+    // ==========================================
     cognitoUrl: 'https://api-integracionqa.winet.pe/oauth2/token',
     polygonUrl: 'https://api-integracionqa.winet.pe/api/v1/coverage/polygon',
     networkUrl: 'https://api-integracionqa.winet.pe/api/v1/network-projects',
-    ontUrl: 'https://api-integracionqa.winet.pe',
-    serviceUrl: 'https://api-integracionqa.winet.pe/api/v1/service-qualification',
 
-    // Cognito - VALORES FIJOS
+    // ==========================================
+    // Cognito
+    // ==========================================
     cognito: {
         clientId: 'ieKJneRZVVKdm9YHz4JkVzoCsRUdqIoK',
         clientSecret: 'MA7CfFdZ738EBaBUXvGvnfipcy9oxA30',
         grantType: 'client_credentials',
-        scope: 'tmf/tmf679.write'
+        scope: 'tmf/tmf679.write services:write bulk-services:write'
     },
 
-    // Headers
+    // ==========================================
+    // Headers globales
+    // ==========================================
     headers: {
         channel: 'WIN'
     },
 
-    // Parámetros - VALORES FIJOS
+    // ==========================================
+    // Parámetros (Polygon / Network)
+    // ==========================================
     params: {
         latitud: '-12.211893244818599',
         longitud: '-77.00200435008979',
         ubigeo: '00150131'
-=======
-    // URLs
-    cognitoUrl: __ENV.POLYGON_COGNITO_URL || '',
-    polygonUrl: __ENV.POLYGON_URL || '',
-    // NETWORK
-    networkUrl: __ENV.NETWORK_URL || '',
-
-
-
-    // Cognito
-    cognito: {
-        clientId: __ENV.POLYGON_COGNITO_CLIENT_ID || '',
-        clientSecret: __ENV.POLYGON_COGNITO_CLIENT_SECRET || '',
-        grantType: __ENV.POLYGON_COGNITO_GRANT_TYPE || 'client_credentials',
-        scope: __ENV.POLYGON_COGNITO_SCOPE || 'tmf/tmf679.write'
     },
 
-
-    // Headers
-    headers: {
-        channel: __ENV.POLYGON_CHANNEL_ID || 'WIN'
-    },
-
-    // Parámetros
-
-
-    params: {
-        latitud: __ENV.POLYGON_LATITUD || '',
-        longitud: __ENV.POLYGON_LONGITUD || '',
-    ubigeo : __ENV.NETWORK_UBIGEO || ''
->>>>>>> 8782307bf19bd182b0b9895a1be375c6326ea6e9
-    },
-
+    // ==========================================
     // Timeouts
+    // ==========================================
     timeouts: {
-<<<<<<< HEAD
-        tokenTimeout: 10000,
+        tokenTimeout: 20000,
         polygonTimeout: 15000,
-        networkTimeout: 30000
-=======
-        tokenTimeout: Number(__ENV.POLYGON_TOKEN_TIMEOUT || 10000),
-        polygonTimeout: Number(__ENV.POLYGON_POLYGON_TIMEOUT || 15000),
-        networkTimeout: Number(__ENV.NETWORK_TIMEOUT || 15000)
->>>>>>> 8782307bf19bd182b0b9895a1be375c6326ea6e9
+        networkTimeout: 15000
     },
 
-    // Configuración del test
+    // ==========================================
+    // Test Polygon / Network
+    // ==========================================
     test: {
         stages: [
-<<<<<<< HEAD
-            { duration: '1m', target: 3 },
-            //{ duration: '1m', target: 30 },
-           // { duration: '1', target: 0 },
-=======
             { duration: '1m', target: 2 },
             { duration: '1m', target: 30 },
-            { duration: '1', target: 0 },
->>>>>>> 8782307bf19bd182b0b9895a1be375c6326ea6e9
+            { duration: '30s', target: 0 },
         ],
         thresholds: {
             http_req_duration: ['p(95)<5000'],
             http_req_failed: ['rate<0.01']
+        }
+    },
+
+    // ==========================================
+    // WINET API CATALOG — services / bulk
+    // ==========================================
+    winet: {
+        baseUrl: 'https://api-integracionqa.winet.pe/api/v1',
+        headers: {
+            channel: 'WIN' // WIN | PF | ULTRA
+        },
+        params: {
+            ownerChange: {
+                orderCode: 0,
+                newOrderCode: 0
+            },
+            speedChange: {
+                group: 'WIN',
+                speed: '1000',
+                serialNumber: '48575443FD8875AE',   // ← CAMBIA ESTO
+                orderCode: 2598640                   // ← CAMBIA ESTO
+            },
+            bulk: {
+                processType: 'APC' // APC | MASIVA
+            }
+        },
+        timeouts: {
+            requestTimeout: 15000
+        },
+
+        // ==========================================
+        // Rate limit de Kong (según headers de respuesta 429)
+        // X-Ratelimit-Limit-Minute: 20 | X-Ratelimit-Limit-Second: 1
+        // ==========================================
+        rateLimit: {
+            perMinute: 20,
+            perSecond: 1,
+            safeRatePerMinute: 18   // margen de seguridad (90% del límite)
+        },
+
+        // Test genérico (servicestatus, speed-changes, etc.)
+        test: {
+            stages: [
+                { duration: '30s', target: 1 },
+                { duration: '30s', target: 2 },
+                { duration: '15s', target: 0 },
+            ],
+            thresholds: {
+                http_req_duration: ['p(95)<5000'],
+                http_req_failed: ['rate<0.01']
+            }
+        },
+
+        // Test BULK: controla requests/min para no pasar el rate limit
+        bulkTest: {
+            scenarios: {
+                bulk_smoke: {
+                    executor: 'constant-arrival-rate',
+                    rate: 18,               // = rateLimit.safeRatePerMinute
+                    timeUnit: '1m',         // 18 req/min → 1 req cada ~3.3 s
+                    duration: '1m15s',
+                    preAllocatedVUs: 1,
+                    maxVUs: 2
+                }
+            },
+            thresholds: {
+                http_req_duration: ['p(95)<5000'],
+                http_req_failed: ['rate<0.01'],
+                'checks{check:status no es 429}': ['rate==1.0']
+            }
         }
     }
 };

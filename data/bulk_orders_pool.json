@@ -1,0 +1,10 @@
+[
+  {
+    "orderCode": "TU_ORDER_CODE_1",
+    "serialNumber": "TU_SERIAL_16CHR1"
+  },
+  {
+    "orderCode": "TU_ORDER_CODE_2",
+    "serialNumber": "TU_SERIAL_16CHR2"
+  }
+]
