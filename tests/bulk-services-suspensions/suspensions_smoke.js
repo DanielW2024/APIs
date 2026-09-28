@@ -1,20 +1,35 @@
 // tests/bulk-services-suspensions/suspensions_smoke.js
 import { check, sleep } from 'k6';
+import { SharedArray } from 'k6/data';
+import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import { getTokenWithRetry } from '../../auth/tokenkong.js';
 import { postBulkSuspensions } from '../../apis/bulk_services_suspensions.js';
 import { config } from '../../config/config1.js';
 
-// Órdenes hardcodeadas (sin archivo externo)
-const ORDERS = [
-    { orderCode: '11111',  serialNumber: '1313131313131313' },
-    { orderCode: '222222', serialNumber: '1414141414141414' },
-];
+// Cargamos el CSV UNA sola vez por VU (gracias a SharedArray)
+const ORDERS = new SharedArray('orders', function () {
+    const csv = open('../datos.csv'); // ruta relativa al archivo del test
+    const parsed = papaparse.parse(csv, { header: true, skipEmptyLines: true }).data;
+
+    // Normalizamos al formato que espera postBulkSuspensions
+    return parsed
+        .filter((row) => row.nserie && row.npedido)
+        .map((row) => ({
+        orderCode: String(row.npedido).trim(),
+        serialNumber: String(row.nserie).trim(),
+    }));
+});
 
 export const options = config.winet.bulkTest;
 
 export function setup() {
     const token = getTokenWithRetry(3);
     if (!token) throw new Error('❌ No se pudo obtener token, abortando test');
+
+    if (ORDERS.length === 0) {
+        throw new Error('❌ El CSV no contiene órdenes válidas');
+    }
+
     return { token };
 }
 
